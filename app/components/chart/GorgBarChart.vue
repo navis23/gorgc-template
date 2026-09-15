@@ -9,7 +9,6 @@ const props = withDefaults(defineProps<{
   labels: string[]
   height?: number
   stacked?: boolean
-  horizontal?: boolean
   showGrid?: boolean
   format?: (n: number) => string
 }>(), { height: 260, showGrid: true, format: (n: number) => formatCompact(n) })

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 const crumbs = useBreadcrumbs()
+const nav = useAppNav()
 </script>
 
 <template>
-  <GorgSidenavLayout :items="appNav" title="gorg" subtitle="Admin kit">
+  <GorgSidenavLayout :items="nav" title="gorg" subtitle="Admin kit">
     <template #toolbar>
       <AppToolbar :crumbs="crumbs" />
     </template>
