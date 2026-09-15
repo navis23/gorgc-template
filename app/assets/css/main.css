@@ -1,0 +1,169 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------
+   gorg design tokens
+   An original scale: "tide" (brand), "ember" (accent), "slate-ink"
+   (neutral). Values are hand-tuned, not derived from any preset.
+---------------------------------------------------------------- */
+@theme {
+  /* brand — desaturated teal, cool and calm */
+  --color-tide-50:  oklch(0.977 0.013 195);
+  --color-tide-100: oklch(0.947 0.030 195);
+  --color-tide-200: oklch(0.898 0.057 194);
+  --color-tide-300: oklch(0.831 0.085 193);
+  --color-tide-400: oklch(0.742 0.104 192);
+  --color-tide-500: oklch(0.658 0.105 191);
+  --color-tide-600: oklch(0.567 0.093 191);
+  --color-tide-700: oklch(0.478 0.077 192);
+  --color-tide-800: oklch(0.399 0.062 193);
+  --color-tide-900: oklch(0.336 0.049 194);
+  --color-tide-950: oklch(0.232 0.036 196);
+
+  /* accent — warm coral, used sparingly for emphasis */
+  --color-ember-50:  oklch(0.972 0.016 30);
+  --color-ember-100: oklch(0.941 0.035 29);
+  --color-ember-200: oklch(0.888 0.068 28);
+  --color-ember-300: oklch(0.815 0.109 27);
+  --color-ember-400: oklch(0.731 0.155 26);
+  --color-ember-500: oklch(0.661 0.187 26);
+  --color-ember-600: oklch(0.590 0.190 27);
+  --color-ember-700: oklch(0.497 0.163 27);
+  --color-ember-800: oklch(0.424 0.134 28);
+  --color-ember-900: oklch(0.369 0.110 29);
+  --color-ember-950: oklch(0.243 0.076 30);
+
+  /* neutral — slightly blue-shifted ink */
+  --color-ink-50:  oklch(0.984 0.002 248);
+  --color-ink-100: oklch(0.967 0.004 248);
+  --color-ink-200: oklch(0.925 0.007 248);
+  --color-ink-300: oklch(0.866 0.011 248);
+  --color-ink-400: oklch(0.706 0.017 249);
+  --color-ink-500: oklch(0.556 0.020 250);
+  --color-ink-600: oklch(0.443 0.020 251);
+  --color-ink-700: oklch(0.367 0.019 252);
+  --color-ink-800: oklch(0.273 0.017 253);
+  --color-ink-900: oklch(0.208 0.015 255);
+  --color-ink-950: oklch(0.138 0.013 257);
+
+  /* semantic */
+  --color-positive: oklch(0.680 0.150 152);
+  --color-caution:  oklch(0.780 0.150 85);
+  --color-critical: oklch(0.620 0.210 25);
+  --color-info:     oklch(0.650 0.140 245);
+
+  /* typography */
+  --font-sans: 'InterVariable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* radii — gorg runs softer than most admin kits */
+  --radius-card: 0.875rem;
+  --radius-field: 0.625rem;
+  --radius-pill: 9999px;
+
+  /* elevation */
+  --shadow-raise: 0 1px 2px 0 oklch(0.208 0.015 255 / 0.05);
+  --shadow-float: 0 4px 16px -2px oklch(0.208 0.015 255 / 0.10), 0 2px 6px -2px oklch(0.208 0.015 255 / 0.06);
+  --shadow-lift:  0 18px 40px -12px oklch(0.208 0.015 255 / 0.22);
+
+  /* motion — shared by CSS and GSAP */
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+  --duration-snap: 140ms;
+  --duration-base: 240ms;
+  --duration-slow: 420ms;
+}
+
+/* semantic surface roles, theme-aware */
+@layer base {
+  :root {
+    --surface-page: var(--color-ink-50);
+    --surface-raised: #fff;
+    --surface-sunken: var(--color-ink-100);
+    --surface-border: var(--color-ink-200);
+    --text-strong: var(--color-ink-900);
+    --text-muted: var(--color-ink-500);
+  }
+
+  .dark {
+    --surface-page: var(--color-ink-950);
+    --surface-raised: var(--color-ink-900);
+    --surface-sunken: oklch(0.175 0.014 256);
+    --surface-border: var(--color-ink-800);
+    --text-strong: var(--color-ink-100);
+    --text-muted: var(--color-ink-400);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--surface-page);
+    color: var(--text-strong);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-tide-500);
+    outline-offset: 2px;
+  }
+
+  /* Pre-hide reveal targets ONLY once the GSAP plugin has armed. Without the
+     .gsap-armed gate, a JS failure would leave this content hidden forever. */
+  .gsap-armed .js-reveal:not(.is-revealed) {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gsap-armed .js-reveal:not(.is-revealed) { opacity: 1; }
+    html { scroll-behavior: auto; }
+  }
+}
+
+@utility surface-card {
+  background-color: var(--surface-raised);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-card);
+}
+
+/* ---------------------------------------------------------------
+   Chart palette
+   Fixed categorical order — slots are assigned by entity, never
+   cycled and never reassigned when a filter changes the series set.
+   Light and dark are independently chosen steps (not a flip), each
+   validated for lightness band, chroma floor, CVD separation,
+   normal-vision separation and contrast against its own surface.
+---------------------------------------------------------------- */
+@layer base {
+  :root {
+    --chart-1: #0A9E95;  /* teal    */
+    --chart-2: #E0603C;  /* coral   */
+    --chart-3: #6D5BD0;  /* violet  */
+    --chart-4: #A87908;  /* amber   */
+    --chart-5: #2F73CC;  /* blue    */
+    --chart-6: #3F9B35;  /* green   */
+    --chart-7: #CC4E92;  /* pink    */
+
+    --chart-grid: var(--color-ink-200);
+    --chart-axis: var(--color-ink-400);
+    --chart-surface: #fff;
+  }
+
+  .dark {
+    --chart-1: #16A89E;
+    --chart-2: #DC6A46;
+    --chart-3: #8878DE;
+    --chart-4: #B68812;
+    --chart-5: #5B96E4;
+    --chart-6: #4FA845;
+    --chart-7: #D264A0;
+
+    --chart-grid: var(--color-ink-800);
+    --chart-axis: var(--color-ink-500);
+    --chart-surface: var(--color-ink-900);
+  }
+}
