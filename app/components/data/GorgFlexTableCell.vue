@@ -25,8 +25,13 @@ const alignment: Record<Align, string> = {
   <div
     role="cell"
     class="flex min-w-0 items-center justify-between gap-3 text-sm text-[var(--text-strong)]"
-    :class="[alignment[align], fixed ? 'md:flex-none' : 'md:flex-1', nowrap && 'md:whitespace-nowrap']"
-    :style="width ? { flexBasis: width } : undefined"
+    :class="[
+      alignment[align],
+      fixed ? 'md:flex-none' : 'md:flex-1',
+      nowrap && 'md:whitespace-nowrap',
+      width && 'md:basis-(--cell-basis)',
+    ]"
+    :style="width ? { '--cell-basis': width } : undefined"
   >
     <span v-if="label" class="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)] md:hidden">
       {{ label }}

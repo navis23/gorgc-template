@@ -9,11 +9,13 @@ const props = withDefaults(defineProps<{
   icon?: string
   sparkline?: number[]
   format?: (n: number) => string
+  /** Decimal places to animate to. Without this a value like 36.8 counts to 37. */
+  decimals?: number
   /** For metrics where down is good (churn, latency, cost). */
   invert?: boolean
 }>(), { format: (n: number) => formatCompact(n) })
 
-const { display } = useCounter(computed(() => props.value), { duration: 1 })
+const { display } = useCounter(computed(() => props.value), { duration: 1, decimals: props.decimals })
 
 const good = computed(() => {
   if (props.delta === undefined)
