@@ -1,59 +1,7 @@
-/**
- * Deterministic sample data for the record / detail layout pages.
- *
- * Kept apart from `mock.ts` so the two demo sets never tread on each other.
- * Every timestamp is derived from a fixed base and read with `getUTC*`, so the
- * server and the browser render byte-identical markup — no hydration drift,
- * no `Math.random()`, no `new Date()` at module scope.
- */
-
-/** The demo "today": 15 September 2026, UTC. */
-export const BASE_DAY = Date.UTC(2026, 8, 15)
-
-const DAY_MS = 86_400_000
-
-const MONTHS_SHORT = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-] as const
-
-/** A point in time relative to the demo base, in UTC. */
-export function dayAt(days: number, hour = 9, minute = 0): Date {
-  return new Date(BASE_DAY + days * DAY_MS + hour * 3_600_000 + minute * 60_000)
-}
+import { dayLabel, dayTimeLabel, demoDate, relativeLabel } from '~/utils/datetime'
 
 function pad(value: number) {
   return value < 10 ? `0${value}` : String(value)
-}
-
-/** `15 Sep 2026` */
-export function formatDay(date: Date): string {
-  return `${date.getUTCDate()} ${MONTHS_SHORT[date.getUTCMonth()]} ${date.getUTCFullYear()}`
-}
-
-/** `15 Sep 2026 · 09:40` */
-export function formatDayTime(date: Date): string {
-  return `${formatDay(date)} · ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`
-}
-
-/** Human distance from the demo base — "3 days ago", "in 2 weeks", "today". */
-export function fromBase(date: Date): string {
-  const days = Math.round((date.getTime() - BASE_DAY) / DAY_MS)
-  if (days === 0)
-    return 'today'
-  if (days === -1)
-    return 'yesterday'
-  if (days === 1)
-    return 'tomorrow'
-
-  const span = Math.abs(days)
-  const unit = span < 14
-    ? `${span} days`
-    : span < 60
-      ? `${Math.round(span / 7)} weeks`
-      : `${Math.round(span / 30)} months`
-
-  return days < 0 ? `${unit} ago` : `in ${unit}`
 }
 
 /**
@@ -129,7 +77,7 @@ export const profile = {
   team: 'Design Systems',
   location: 'Rotterdam, Netherlands',
   timezone: 'Europe/Amsterdam',
-  joined: formatDay(dayAt(-1_146)),
+  joined: dayLabel(demoDate(-1_146)),
   status: 'online' as const,
   availability: 'Open to reviews · slow on Fridays',
   bio: [
@@ -173,7 +121,7 @@ export const profileActivity: ActivityEntry[] = [
     tone: 'brand',
     title: 'Merged “Token pipeline: emit dark variants”',
     detail: 'atlas-tokens · 14 files changed, 3 reviewers',
-    at: `${formatDayTime(dayAt(0, 8, 40))} · ${fromBase(dayAt(0))}`,
+    at: `${dayTimeLabel(demoDate(0, 8, 40))} · ${relativeLabel(demoDate(0))}`,
   },
   {
     id: 2,
@@ -181,7 +129,7 @@ export const profileActivity: ActivityEntry[] = [
     tone: 'info',
     title: 'Left 9 comments on “Invoice detail redesign”',
     detail: 'Mostly about focus order in the line-item table',
-    at: `${formatDayTime(dayAt(-1, 16, 5))} · ${fromBase(dayAt(-1))}`,
+    at: `${dayTimeLabel(demoDate(-1, 16, 5))} · ${relativeLabel(demoDate(-1))}`,
   },
   {
     id: 3,
@@ -189,7 +137,7 @@ export const profileActivity: ActivityEntry[] = [
     tone: 'positive',
     title: 'Closed accessibility audit AUD-41',
     detail: 'All 23 findings resolved; two waived with rationale',
-    at: `${formatDayTime(dayAt(-4, 11, 20))} · ${fromBase(dayAt(-4))}`,
+    at: `${dayTimeLabel(demoDate(-4, 11, 20))} · ${relativeLabel(demoDate(-4))}`,
   },
   {
     id: 4,
@@ -197,7 +145,7 @@ export const profileActivity: ActivityEntry[] = [
     tone: 'accent',
     title: 'Ran the guild session on reduced motion',
     detail: '41 attendees · recording in the Files tab',
-    at: `${formatDayTime(dayAt(-8, 13, 0))} · ${fromBase(dayAt(-8))}`,
+    at: `${dayTimeLabel(demoDate(-8, 13, 0))} · ${relativeLabel(demoDate(-8))}`,
   },
   {
     id: 5,
@@ -205,7 +153,7 @@ export const profileActivity: ActivityEntry[] = [
     tone: 'caution',
     title: 'Flagged a contrast regression in the caution palette',
     detail: 'Reverted before it reached the release branch',
-    at: `${formatDayTime(dayAt(-13, 9, 15))} · ${fromBase(dayAt(-13))}`,
+    at: `${dayTimeLabel(demoDate(-13, 9, 15))} · ${relativeLabel(demoDate(-13))}`,
   },
   {
     id: 6,
@@ -213,7 +161,7 @@ export const profileActivity: ActivityEntry[] = [
     tone: 'neutral',
     title: 'Onboarded Dilan Ergün to the systems rota',
     detail: 'Paired for a week on the component review queue',
-    at: `${formatDayTime(dayAt(-21, 10, 30))} · ${fromBase(dayAt(-21))}`,
+    at: `${dayTimeLabel(demoDate(-21, 10, 30))} · ${relativeLabel(demoDate(-21))}`,
   },
 ]
 
@@ -257,12 +205,12 @@ export const profileProjects: ProfileProject[] = [
 ]
 
 export const profileFiles: ProfileFile[] = [
-  { id: 'f1', name: 'atlas-tokens-v3.json', kind: 'Token export', icon: 'lucide:file-json', size: '184 KB', at: formatDay(dayAt(0)) },
-  { id: 'f2', name: 'reduced-motion-session.mp4', kind: 'Recording', icon: 'lucide:file-video', size: '412 MB', at: formatDay(dayAt(-8)) },
-  { id: 'f3', name: 'contrast-matrix.csv', kind: 'Spreadsheet', icon: 'lucide:file-spreadsheet', size: '22 KB', at: formatDay(dayAt(-13)) },
-  { id: 'f4', name: 'audit-AUD-41.pdf', kind: 'Report', icon: 'lucide:file-text', size: '1.8 MB', at: formatDay(dayAt(-4)) },
-  { id: 'f5', name: 'focus-ring-explorations.fig', kind: 'Design file', icon: 'lucide:file-image', size: '9.4 MB', at: formatDay(dayAt(-26)) },
-  { id: 'f6', name: 'onboarding-checklist.md', kind: 'Document', icon: 'lucide:file-code', size: '6 KB', at: formatDay(dayAt(-21)) },
+  { id: 'f1', name: 'atlas-tokens-v3.json', kind: 'Token export', icon: 'lucide:file-json', size: '184 KB', at: dayLabel(demoDate(0)) },
+  { id: 'f2', name: 'reduced-motion-session.mp4', kind: 'Recording', icon: 'lucide:file-video', size: '412 MB', at: dayLabel(demoDate(-8)) },
+  { id: 'f3', name: 'contrast-matrix.csv', kind: 'Spreadsheet', icon: 'lucide:file-spreadsheet', size: '22 KB', at: dayLabel(demoDate(-13)) },
+  { id: 'f4', name: 'audit-AUD-41.pdf', kind: 'Report', icon: 'lucide:file-text', size: '1.8 MB', at: dayLabel(demoDate(-4)) },
+  { id: 'f5', name: 'focus-ring-explorations.fig', kind: 'Design file', icon: 'lucide:file-image', size: '9.4 MB', at: dayLabel(demoDate(-26)) },
+  { id: 'f6', name: 'onboarding-checklist.md', kind: 'Document', icon: 'lucide:file-code', size: '6 KB', at: dayLabel(demoDate(-21)) },
 ]
 
 /* ---------------------------------------------------------------------------
@@ -303,9 +251,9 @@ export const record = {
   priority: 'high' as const,
   owner: { name: 'Noor Abdel-Rahim', role: 'Staff Design Engineer' },
   reporter: { name: 'Rosa Betancourt', role: 'Head of Design' },
-  created: formatDay(dayAt(-96)),
-  updated: `${formatDayTime(dayAt(0, 8, 40))} · ${fromBase(dayAt(0))}`,
-  due: `${formatDay(dayAt(24))} · ${fromBase(dayAt(24))}`,
+  created: dayLabel(demoDate(-96)),
+  updated: `${dayTimeLabel(demoDate(0, 8, 40))} · ${relativeLabel(demoDate(0))}`,
+  due: `${dayLabel(demoDate(24))} · ${relativeLabel(demoDate(24))}`,
   estimate: '18 days remaining',
   tags: ['design-system', 'tokens', 'accessibility', 'build-pipeline'],
   description: [
@@ -321,12 +269,12 @@ export const record = {
 }
 
 export const milestones: RecordMilestone[] = [
-  { id: 'm1', label: 'Audit existing palettes', detail: 'All six products catalogued into one sheet', due: formatDay(dayAt(-74)), done: true, owner: 'Rosa Betancourt' },
-  { id: 'm2', label: 'Agree the semantic layer', detail: 'surface / text / status roles signed off', due: formatDay(dayAt(-52)), done: true, owner: 'Noor Abdel-Rahim' },
-  { id: 'm3', label: 'Build the Figma exporter', detail: 'Variables → JSON, running in CI nightly', due: formatDay(dayAt(-18)), done: true, owner: 'Hiro Tanabe' },
-  { id: 'm4', label: 'Emit dark-mode variants', detail: 'Independently chosen steps, not a lightness flip', due: formatDay(dayAt(2)), done: false, owner: 'Noor Abdel-Rahim' },
-  { id: 'm5', label: 'Migrate the admin surface', detail: 'First real consumer, behind a flag', due: formatDay(dayAt(12)), done: false, owner: 'Casper Nørgaard' },
-  { id: 'm6', label: 'Contrast regression gate', detail: 'CI fails the build on a WCAG drop', due: formatDay(dayAt(24)), done: false, owner: 'Dilan Ergün' },
+  { id: 'm1', label: 'Audit existing palettes', detail: 'All six products catalogued into one sheet', due: dayLabel(demoDate(-74)), done: true, owner: 'Rosa Betancourt' },
+  { id: 'm2', label: 'Agree the semantic layer', detail: 'surface / text / status roles signed off', due: dayLabel(demoDate(-52)), done: true, owner: 'Noor Abdel-Rahim' },
+  { id: 'm3', label: 'Build the Figma exporter', detail: 'Variables → JSON, running in CI nightly', due: dayLabel(demoDate(-18)), done: true, owner: 'Hiro Tanabe' },
+  { id: 'm4', label: 'Emit dark-mode variants', detail: 'Independently chosen steps, not a lightness flip', due: dayLabel(demoDate(2)), done: false, owner: 'Noor Abdel-Rahim' },
+  { id: 'm5', label: 'Migrate the admin surface', detail: 'First real consumer, behind a flag', due: dayLabel(demoDate(12)), done: false, owner: 'Casper Nørgaard' },
+  { id: 'm6', label: 'Contrast regression gate', detail: 'CI fails the build on a WCAG drop', due: dayLabel(demoDate(24)), done: false, owner: 'Dilan Ergün' },
 ]
 
 export const recordComments: RecordComment[] = [
@@ -336,7 +284,7 @@ export const recordComments: RecordComment[] = [
     role: 'Head of Design',
     body: 'Pinning this: the acceptance bar is the rename-in-Figma round trip. If that still needs '
       + 'an engineer at the end of the quarter, we have not shipped it, however good the JSON looks.',
-    at: `${formatDayTime(dayAt(-30, 10, 0))} · ${fromBase(dayAt(-30))}`,
+    at: `${dayTimeLabel(demoDate(-30, 10, 0))} · ${relativeLabel(demoDate(-30))}`,
     pinned: true,
   },
   {
@@ -345,7 +293,7 @@ export const recordComments: RecordComment[] = [
     role: 'Platform Engineer',
     body: 'Exporter is green in CI. One caveat — Figma rate-limits us at about 40 requests a minute, '
       + 'so the nightly job batches by collection rather than by variable. Slower, but it stops flaking.',
-    at: `${formatDayTime(dayAt(-16, 15, 25))} · ${fromBase(dayAt(-16))}`,
+    at: `${dayTimeLabel(demoDate(-16, 15, 25))} · ${relativeLabel(demoDate(-16))}`,
   },
   {
     id: 3,
@@ -353,7 +301,7 @@ export const recordComments: RecordComment[] = [
     role: 'Frontend Engineer',
     body: 'Started the admin migration on a branch. The only genuinely painful part is the four places '
       + 'that read a hex out of a data attribute. I would rather fix those than shim them.',
-    at: `${formatDayTime(dayAt(-6, 9, 5))} · ${fromBase(dayAt(-6))}`,
+    at: `${dayTimeLabel(demoDate(-6, 9, 5))} · ${relativeLabel(demoDate(-6))}`,
   },
   {
     id: 4,
@@ -361,7 +309,7 @@ export const recordComments: RecordComment[] = [
     role: 'Staff Design Engineer',
     body: 'Agreed, fix them. I pushed the dark variants this morning — every step was chosen against '
       + 'its own surface rather than flipped, so please eyeball the caution ramp before it lands.',
-    at: `${formatDayTime(dayAt(0, 8, 52))} · ${fromBase(dayAt(0))}`,
+    at: `${dayTimeLabel(demoDate(0, 8, 52))} · ${relativeLabel(demoDate(0))}`,
   },
 ]
 
@@ -399,8 +347,8 @@ export interface InvoiceEvent {
 export const invoice = {
   number: 'INV-2087',
   reference: 'PO 4417-NB',
-  issued: formatDay(dayAt(-12)),
-  due: formatDay(dayAt(18)),
+  issued: dayLabel(demoDate(-12)),
+  due: dayLabel(demoDate(18)),
   terms: 'Net 30',
   currency: '$',
   taxLabel: 'VAT (21%)',
@@ -436,10 +384,10 @@ export const lineItems: LineItem[] = [
 
 /** Fixed part of the story; "paid" is appended at runtime by the toolbar. */
 export const invoiceEvents: InvoiceEvent[] = [
-  { id: 'e1', label: 'Drafted', detail: 'Prepared by Rosa Betancourt', at: formatDayTime(dayAt(-15, 14, 10)), icon: 'lucide:file-pen', tone: 'neutral' },
-  { id: 'e2', label: 'Issued', detail: 'Sent to accounts@northbank.example', at: formatDayTime(dayAt(-12, 9, 0)), icon: 'lucide:send', tone: 'brand' },
-  { id: 'e3', label: 'Opened', detail: 'Viewed twice by Marcus Webb', at: formatDayTime(dayAt(-11, 11, 42)), icon: 'lucide:mail-open', tone: 'info' },
-  { id: 'e4', label: 'Reminder sent', detail: 'Automatic nudge, 14 days before due', at: formatDayTime(dayAt(-4, 8, 0)), icon: 'lucide:bell-ring', tone: 'caution' },
+  { id: 'e1', label: 'Drafted', detail: 'Prepared by Rosa Betancourt', at: dayTimeLabel(demoDate(-15, 14, 10)), icon: 'lucide:file-pen', tone: 'neutral' },
+  { id: 'e2', label: 'Issued', detail: 'Sent to accounts@northbank.example', at: dayTimeLabel(demoDate(-12, 9, 0)), icon: 'lucide:send', tone: 'brand' },
+  { id: 'e3', label: 'Opened', detail: 'Viewed twice by Marcus Webb', at: dayTimeLabel(demoDate(-11, 11, 42)), icon: 'lucide:mail-open', tone: 'info' },
+  { id: 'e4', label: 'Reminder sent', detail: 'Automatic nudge, 14 days before due', at: dayTimeLabel(demoDate(-4, 8, 0)), icon: 'lucide:bell-ring', tone: 'caution' },
 ]
 
 /* ---------------------------------------------------------------------------

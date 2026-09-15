@@ -1,3 +1,11 @@
+import {
+  isoDay,
+  monthDayLabel,
+  MONTHS_SHORT,
+  weekdayLabel,
+  WEEKDAYS_SHORT,
+} from '~/utils/datetime'
+
 /**
  * Deterministic sample data for the demo pages.
  * Seeded so SSR and client render identical markup (no hydration drift).
@@ -22,8 +30,9 @@ export function walk(n: number, start = 100, drift = 0.02, vol = 0.08) {
   return out
 }
 
-export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-export const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+/** Chart axis labels. Aliases the canonical arrays in datetime.ts. */
+export const MONTHS = MONTHS_SHORT
+export const WEEKDAYS = WEEKDAYS_SHORT
 
 export const revenueSeries = [
   { name: 'Subscriptions', data: walk(12, 42000, 0.03, 0.10).map(Math.round) },
@@ -162,24 +171,23 @@ export const threads: Thread[] = [
 
 /** Fixed "today" for every demo dashboard: 2026-09-15, in UTC so the
  *  server's timezone can never shift a label. */
-const DEMO_TODAY_MS = Date.UTC(2026, 8, 15)
-const DAY_MS = 86_400_000
 
 /** `Sep 15` for the day `offset` days before the fixed demo date. */
-export function dayLabelBack(offset: number): string {
-  const d = new Date(DEMO_TODAY_MS - offset * DAY_MS)
-  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`
+/** Offset BACKWARD from the demo epoch (0 = today, 3 = three days ago). */
+export function dayLabelBack(offset: number) {
+  return monthDayLabel(-offset)
 }
 
 /** `2026-09-15` for the day `offset` days before the fixed demo date. */
-export function isoDayBack(offset: number): string {
-  return new Date(DEMO_TODAY_MS - offset * DAY_MS).toISOString().slice(0, 10)
+/** Offset BACKWARD from the demo epoch (0 = today, 3 = three days ago). */
+export function isoDayBack(offset: number) {
+  return isoDay(-offset)
 }
 
 /** `Mon` … `Sun` for the day `offset` days before the fixed demo date. */
-export function weekdayBack(offset: number): string {
-  const d = new Date(DEMO_TODAY_MS - offset * DAY_MS)
-  return WEEKDAYS[(d.getUTCDay() + 6) % 7]!
+/** Offset BACKWARD from the demo epoch (0 = today, 3 = three days ago). */
+export function weekdayBack(offset: number) {
+  return weekdayLabel(-offset)
 }
 
 /* ---------------------------------------------------------------

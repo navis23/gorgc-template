@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { GorgDropdownItem } from '~/components/nav/nav'
 import type { ReleaseRun, RunStatus } from '~/utils/mock-collections'
-import { relativeLabel, releaseRuns } from '~/utils/mock-collections'
+import { relativeLabel } from '~/utils/datetime'
+import { releaseRuns } from '~/utils/mock-collections'
 
 useHead({ title: 'List view' })
 

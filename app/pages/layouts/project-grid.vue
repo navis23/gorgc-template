@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProjectAccent, ProjectStatus } from '~/utils/mock-collections'
-import { dayLabel, projects, relativeLabel, shortDayLabel } from '~/utils/mock-collections'
+import { dayLabel, relativeLabel, shortDayLabel } from '~/utils/datetime'
+import { projects } from '~/utils/mock-collections'
 
 useHead({ title: 'Project grid' })
 

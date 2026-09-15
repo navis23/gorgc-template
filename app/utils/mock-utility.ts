@@ -1,8 +1,9 @@
+import { isoDay } from '~/utils/datetime'
+
 /**
  * Demo data for the utility layout pages (calendar, notifications, files, search).
  * Deterministic: a fixed epoch and a seeded stream, so SSR and client agree.
  */
-const EPOCH = Date.UTC(2026, 8, 15) // 15 Sep 2026, fixed
 
 function seeded(seed: number) {
   let s = seed
@@ -13,11 +14,7 @@ function seeded(seed: number) {
 }
 const rand = seeded(90126)
 
-export function isoDayOffset(days: number) {
-  return new Date(EPOCH + days * 86400000).toISOString().slice(0, 10)
-}
-
-export const TODAY_ISO = isoDayOffset(0)
+export const TODAY_ISO = isoDay(0)
 
 /* ---------------------------------------------------------------- calendar */
 
@@ -43,18 +40,18 @@ export const eventKindLabel: Record<EventKind, string> = {
 }
 
 export const calendarEvents: CalEvent[] = [
-  { id: 1, title: 'Platform standup', day: isoDayOffset(0), start: '09:30', end: '09:45', kind: 'meeting', attendees: ['Amara Osei', 'Tobias Lindqvist', 'Elif Demir'], location: 'Room 2 / Meet' },
-  { id: 2, title: 'INC-2210 review', day: isoDayOffset(0), start: '11:00', end: '12:00', kind: 'incident', attendees: ['Priya Raghunathan', 'Amara Osei'], location: 'War room' },
-  { id: 3, title: 'Rate limiter rollout', day: isoDayOffset(0), start: '15:00', end: '16:00', kind: 'release', attendees: ['Tobias Lindqvist'] },
-  { id: 4, title: 'Design review — passkeys', day: isoDayOffset(1), start: '10:00', end: '11:00', kind: 'review', attendees: ['Amara Osei', 'Lena Kowalski'] },
-  { id: 5, title: 'Hiring panel', day: isoDayOffset(1), start: '14:00', end: '15:30', kind: 'meeting', attendees: ['Nnamdi Okafor', 'Hiroshi Tanaka'] },
-  { id: 6, title: 'Ingrid — annual leave', day: isoDayOffset(2), start: '00:00', end: '23:59', kind: 'leave', attendees: ['Ingrid Sørensen'] },
-  { id: 7, title: 'Quarterly access review', day: isoDayOffset(3), start: '13:00', end: '14:00', kind: 'review', attendees: ['Fatima Al-Rashid'] },
-  { id: 8, title: 'v2.15 cut', day: isoDayOffset(4), start: '09:00', end: '09:30', kind: 'release', attendees: ['Tobias Lindqvist', 'Diego Moreno'] },
-  { id: 9, title: 'Capacity planning', day: isoDayOffset(-2), start: '11:00', end: '12:00', kind: 'meeting', attendees: ['Ingrid Sørensen', 'Amara Osei'] },
-  { id: 10, title: 'Postmortem circulated', day: isoDayOffset(-1), start: '16:00', end: '16:30', kind: 'incident', attendees: ['Priya Raghunathan'] },
-  { id: 11, title: 'Billing service spike', day: isoDayOffset(6), start: '10:00', end: '12:00', kind: 'review', attendees: ['Elif Demir'] },
-  { id: 12, title: 'All-hands', day: isoDayOffset(8), start: '16:00', end: '17:00', kind: 'meeting', attendees: ['Amara Osei', 'Marcus Webb'] },
+  { id: 1, title: 'Platform standup', day: isoDay(0), start: '09:30', end: '09:45', kind: 'meeting', attendees: ['Amara Osei', 'Tobias Lindqvist', 'Elif Demir'], location: 'Room 2 / Meet' },
+  { id: 2, title: 'INC-2210 review', day: isoDay(0), start: '11:00', end: '12:00', kind: 'incident', attendees: ['Priya Raghunathan', 'Amara Osei'], location: 'War room' },
+  { id: 3, title: 'Rate limiter rollout', day: isoDay(0), start: '15:00', end: '16:00', kind: 'release', attendees: ['Tobias Lindqvist'] },
+  { id: 4, title: 'Design review — passkeys', day: isoDay(1), start: '10:00', end: '11:00', kind: 'review', attendees: ['Amara Osei', 'Lena Kowalski'] },
+  { id: 5, title: 'Hiring panel', day: isoDay(1), start: '14:00', end: '15:30', kind: 'meeting', attendees: ['Nnamdi Okafor', 'Hiroshi Tanaka'] },
+  { id: 6, title: 'Ingrid — annual leave', day: isoDay(2), start: '00:00', end: '23:59', kind: 'leave', attendees: ['Ingrid Sørensen'] },
+  { id: 7, title: 'Quarterly access review', day: isoDay(3), start: '13:00', end: '14:00', kind: 'review', attendees: ['Fatima Al-Rashid'] },
+  { id: 8, title: 'v2.15 cut', day: isoDay(4), start: '09:00', end: '09:30', kind: 'release', attendees: ['Tobias Lindqvist', 'Diego Moreno'] },
+  { id: 9, title: 'Capacity planning', day: isoDay(-2), start: '11:00', end: '12:00', kind: 'meeting', attendees: ['Ingrid Sørensen', 'Amara Osei'] },
+  { id: 10, title: 'Postmortem circulated', day: isoDay(-1), start: '16:00', end: '16:30', kind: 'incident', attendees: ['Priya Raghunathan'] },
+  { id: 11, title: 'Billing service spike', day: isoDay(6), start: '10:00', end: '12:00', kind: 'review', attendees: ['Elif Demir'] },
+  { id: 12, title: 'All-hands', day: isoDay(8), start: '16:00', end: '17:00', kind: 'meeting', attendees: ['Amara Osei', 'Marcus Webb'] },
 ]
 
 /* ----------------------------------------------------------- notifications */

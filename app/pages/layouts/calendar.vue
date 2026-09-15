@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CalEvent, EventKind } from '~/utils/mock-utility'
-import { calendarEvents, eventKindLabel, isoDayOffset, TODAY_ISO } from '~/utils/mock-utility'
+import { isoDay } from '~/utils/datetime'
+import { calendarEvents, eventKindLabel, TODAY_ISO } from '~/utils/mock-utility'
 
 useHead({ title: 'Calendar' })
 
@@ -77,7 +78,7 @@ function shiftMonth(n: number) {
 const agenda = computed(() => {
   const out: Array<{ iso: string, label: string, items: CalEvent[] }> = []
   for (let i = 0; i < 14; i++) {
-    const iso = isoDayOffset(i)
+    const iso = isoDay(i)
     const items = byDay.value.get(iso)
     if (items?.length) {
       out.push({
@@ -250,13 +251,13 @@ const selectedLabel = computed(() =>
               <p class="text-[11px] font-medium text-[var(--text-muted)]">{{ WEEK[i - 1] }}</p>
               <p
                 class="mt-0.5 text-sm font-semibold"
-                :class="isoDayOffset(i - 1) === TODAY_ISO ? 'text-tide-600 dark:text-tide-300' : 'text-[var(--text-strong)]'"
+                :class="isoDay(i - 1) === TODAY_ISO ? 'text-tide-600 dark:text-tide-300' : 'text-[var(--text-strong)]'"
               >
-                {{ new Date(isoDayOffset(i - 1)).getUTCDate() }}
+                {{ new Date(isoDay(i - 1)).getUTCDate() }}
               </p>
             </header>
             <ul class="min-h-64 space-y-1.5 p-2">
-              <li v-for="e in (byDay.get(isoDayOffset(i - 1)) ?? [])" :key="e.id">
+              <li v-for="e in (byDay.get(isoDay(i - 1)) ?? [])" :key="e.id">
                 <article class="rounded-field p-2" :class="kindTone[e.kind]">
                   <p class="text-[11px] font-semibold">{{ e.start }}</p>
                   <p class="mt-0.5 text-xs leading-snug">{{ e.title }}</p>

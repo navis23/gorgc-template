@@ -1,47 +1,4 @@
-/**
- * Deterministic sample data for the collection / browse layout pages.
- *
- * Everything here is a literal or derived from COLLECTION_BASE — no Math.random(),
- * no `new Date()` at module scope — so the server and the client render the
- * exact same markup and hydration stays quiet.
- */
-
-const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-const DAY_MS = 86_400_000
-
-/** Fixed "today" for every relative label on these pages. */
-export const COLLECTION_BASE = Date.UTC(2026, 8, 15)
-
-export function shiftDays(days: number): Date {
-  return new Date(COLLECTION_BASE + days * DAY_MS)
-}
-
-/** "15 Sep 2026" — hand-formatted so no locale or timezone can drift. */
-export function dayLabel(days: number): string {
-  const d = shiftDays(days)
-  return `${d.getUTCDate()} ${MONTH_SHORT[d.getUTCMonth()]} ${d.getUTCFullYear()}`
-}
-
-/** "6 Oct" — the compact form for tight footers. */
-export function shortDayLabel(days: number): string {
-  const d = shiftDays(days)
-  return `${d.getUTCDate()} ${MONTH_SHORT[d.getUTCMonth()]}`
-}
-
-/** "in 4 days" / "yesterday" / "3 weeks ago" — never colour-alone, always words. */
-export function relativeLabel(days: number): string {
-  if (days === 0)
-    return 'today'
-  if (days === 1)
-    return 'tomorrow'
-  if (days === -1)
-    return 'yesterday'
-
-  const n = Math.abs(days)
-  const unit = n >= 14 ? `${Math.round(n / 7)} weeks` : `${n} days`
-  return days > 0 ? `in ${unit}` : `${unit} ago`
-}
+import { dayLabel, demoDate, relativeLabel, shortDayLabel } from '~/utils/datetime'
 
 /* ------------------------------------------------------------------ *
  * 1 — people directory (card grid)

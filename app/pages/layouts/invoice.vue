@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { InvoiceEvent } from '~/utils/mock-records'
-import { dayAt, formatDayTime, formatCents, invoice, invoiceEvents, lineItems } from '~/utils/mock-records'
+import { dayTimeLabel, demoDate } from '~/utils/datetime'
+import { formatCents, invoice, invoiceEvents, lineItems } from '~/utils/mock-records'
 
 useHead({ title: `${invoice.number} · Invoice` })
 
@@ -37,7 +38,7 @@ function markPaid() {
     id: 'e-paid',
     label: 'Paid in full',
     detail: `Bank transfer received · ${formatCents(total, invoice.currency)}`,
-    at: formatDayTime(dayAt(0, 11, 30)),
+    at: dayTimeLabel(demoDate(0, 11, 30)),
     icon: 'lucide:banknote',
     tone: 'positive',
   })

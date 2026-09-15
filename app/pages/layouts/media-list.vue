@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { MediaKind } from '~/utils/mock-collections'
 import { formatCompact } from '~/utils/chart'
-import { dayLabel, mediaLibrary, relativeLabel } from '~/utils/mock-collections'
+import { dayLabel, relativeLabel } from '~/utils/datetime'
+import { mediaLibrary } from '~/utils/mock-collections'
 
 useHead({ title: 'Media list' })
 
