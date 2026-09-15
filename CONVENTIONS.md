@@ -48,3 +48,37 @@ Add `class="js-reveal"` to anything `useReveal` animates.
 Real semantics (`<button>`, `<nav>`, `<table>`), labelled controls,
 visible `:focus-visible`, `aria-*` on custom widgets, respect
 `prefers-reduced-motion` (already handled globally by the gsap plugin).
+
+## Use the shared primitives — do not hand-roll these
+
+These exist because the same logic had been rewritten across a dozen pages.
+Reach for them before writing your own.
+
+| Need | Use | Not |
+|---|---|---|
+| Mutually-exclusive view/mode choice | `<GorgSegmented v-model :items>` | a `v-for` of `aria-pressed` buttons |
+| Search / filter / sort / paginate a list | `useCollection(source, {...})` | per-page `query`/`sortKey`/`page` refs |
+| Any date or time string | `~/utils/datetime` | a local formatter or `new Date()` |
+| Money | `formatCurrency` (decimals) or `formatCents` (integer cents) | `toLocaleString` |
+
+`GorgSegmented` is only for a *group* of mutually-exclusive options. A single
+on/off button (password reveal, follow) stays a plain button with `aria-pressed`,
+and a long filter list stays a `<nav>` of chips — neither is a segmented control.
+
+## Two rules that come from real bugs
+
+**Never let animation hide content.** `useReveal`/`useStagger` pass
+`immediateRender: false` so a tween that never runs leaves the element visible.
+A GSAP call that stamps `opacity: 0` up front will blank the page if its trigger
+mis-measures. Guard `querySelectorAll` results before tweening them — GSAP warns
+on empty targets.
+
+**Never format with the runtime's locale data.** `toLocaleString` and
+`Intl.NumberFormat` use the ICU data built into the runtime, and Node's differs
+from the browser's. That makes SSR and client render different text, which Vue
+reports as a hydration mismatch. Format by hand; `utils/datetime.ts` and
+`utils/chart.ts` already do.
+
+Anything measured from the DOM (`useElementSize`) reads 0 on the server, so gate
+it behind a `mounted` ref and hold the SSR fallback for the first client render —
+otherwise the two sides disagree.

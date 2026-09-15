@@ -84,21 +84,10 @@ const dealColumns = [
   { key: 'closes', label: 'Closes', align: 'end' as const, nowrap: true },
 ]
 
-const sortKey = ref<string | null>('value')
-const sortDirection = ref<'asc' | 'desc'>('desc')
-
-const sortedDeals = computed(() => {
-  const key = sortKey.value
-  if (!key)
-    return salesDeals
-  const dir = sortDirection.value === 'asc' ? 1 : -1
-  return [...salesDeals].sort((a, b) => {
-    const x = a[key as keyof typeof a]
-    const y = b[key as keyof typeof b]
-    if (typeof x === 'number' && typeof y === 'number')
-      return (x - y) * dir
-    return String(x).localeCompare(String(y)) * dir
-  })
+const { sortKey, sortDirection, visible: sortedDeals, total: dealCount } = useCollection(salesDeals, {
+  initialSort: 'value',
+  initialDirection: 'desc',
+  pageSize: 0,
 })
 
 const leaderboard = [...salesReps].sort((a, b) => b.closed - a.closed)
@@ -232,7 +221,7 @@ const leaderboard = [...salesReps].sort((a, b) => b.closed - a.closed)
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--surface-border)] p-4">
           <div class="min-w-0">
             <h2 class="text-sm font-semibold text-[var(--text-strong)]">Open and recent deals</h2>
-            <p class="mt-0.5 text-xs text-[var(--text-muted)]">{{ salesDeals.length }} records</p>
+            <p class="mt-0.5 text-xs text-[var(--text-muted)]">{{ dealCount }} records</p>
           </div>
           <GorgButton variant="ghost" size="xs">
             <template #lead>

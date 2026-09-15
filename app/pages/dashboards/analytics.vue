@@ -26,7 +26,11 @@ useStagger(lower, { each: 0.07 })
    of the same length is what every delta is measured against. */
 const RANGES = [7, 30, 90] as const
 type Range = (typeof RANGES)[number]
-const range = ref<Range>(30)
+
+/** The segmented control models a string; the window itself stays a number. */
+const rangeKey = ref('30')
+const range = computed(() => Number(rangeKey.value) as Range)
+const rangeItems = RANGES.map(r => ({ value: String(r), label: `${r}d` }))
 
 function tail<T>(arr: T[], n: number): T[] {
   return arr.slice(-n)
@@ -101,23 +105,13 @@ const signed = (n: number) => `${n >= 0 ? '+' : ''}${(n * 100).toFixed(1)}%`
         </p>
       </div>
 
-      <div
-        class="inline-flex shrink-0 gap-0.5 rounded-pill bg-[var(--surface-sunken)] p-1"
-        role="group"
+      <GorgSegmented
+        v-model="rangeKey"
+        :items="rangeItems"
+        variant="pill"
         aria-label="Date range"
-      >
-        <GorgButton
-          v-for="r in RANGES"
-          :key="r"
-          size="xs"
-          pill
-          :variant="range === r ? 'solid' : 'ghost'"
-          :aria-pressed="range === r"
-          @click="range = r"
-        >
-          {{ r }}d
-        </GorgButton>
-      </div>
+        class="shrink-0"
+      />
     </header>
 
     <div ref="tiles" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

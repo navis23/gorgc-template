@@ -9,7 +9,6 @@ useHead({ title: 'List view' })
 /** Local copy so row actions (archive, re-run) never mutate the shared fixture. */
 const runs = ref<ReleaseRun[]>(releaseRuns.map(run => ({ ...run })))
 
-const query = ref('')
 const statusFilter = ref<RunStatus | 'all'>('all')
 const selected = ref<string[]>([])
 
@@ -21,19 +20,18 @@ const statusItems = [
   { label: 'Queued', value: 'queued' },
 ]
 
-const visible = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  return runs.value.filter((run) => {
-    if (statusFilter.value !== 'all' && run.status !== statusFilter.value)
-      return false
-    if (!q)
-      return true
-    return run.title.toLowerCase().includes(q)
-      || run.branch.toLowerCase().includes(q)
-      || run.author.toLowerCase().includes(q)
-      || run.id.includes(q)
-  })
+const collection = useCollection(runs, {
+  searchFields: ['title', 'branch', 'author', 'id'],
+  // Read through the ref so the status select stays reactive.
+  filters: { status: run => statusFilter.value === 'all' || run.status === statusFilter.value },
+  pageSize: 0,
 })
+const { query, visible, total, isEmpty } = collection
+
+function resetFilters() {
+  collection.reset()
+  statusFilter.value = 'all'
+}
 
 const statuses: Record<RunStatus, {
   label: string
@@ -118,7 +116,7 @@ useStagger(list, { each: 0.03, y: 12 })
       <div>
         <h1 class="text-xl font-semibold text-[var(--text-strong)]">Release runs</h1>
         <p class="mt-1 text-sm text-[var(--text-muted)]">
-          {{ visible.length }} of {{ runs.length }} runs · last 9 days
+          {{ total }} of {{ runs.length }} runs · last 9 days
         </p>
       </div>
       <GorgButton size="sm" variant="outline">
@@ -186,7 +184,7 @@ useStagger(list, { each: 0.03, y: 12 })
         </div>
       </div>
 
-      <ul v-if="visible.length" ref="list" class="divide-y divide-[var(--surface-border)]">
+      <ul v-if="!isEmpty" ref="list" class="divide-y divide-[var(--surface-border)]">
         <li
           v-for="run in visible"
           :key="run.id"
@@ -265,7 +263,7 @@ useStagger(list, { each: 0.03, y: 12 })
         description="Clear the search or widen the status filter."
       >
         <template #action>
-          <GorgButton size="sm" variant="outline" @click="query = ''; statusFilter = 'all'">
+          <GorgButton size="sm" variant="outline" @click="resetFilters">
             Reset filters
           </GorgButton>
         </template>

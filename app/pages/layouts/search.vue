@@ -1,28 +1,52 @@
 <script setup lang="ts">
-import type { ResultKind } from '~/utils/mock-utility'
+import type { ResultKind, SearchResult } from '~/utils/mock-utility'
 import { resultKindMeta, searchResults } from '~/utils/mock-utility'
 
 useHead({ title: 'Search' })
 
-const query = ref('rate limiter')
 const kinds = Object.keys(resultKindMeta) as ResultKind[]
 const activeKind = ref<'all' | ResultKind>('all')
-const sort = ref<'relevance' | 'title'>('relevance')
 
-const matched = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  return searchResults.filter(r => !q
-    || r.title.toLowerCase().includes(q)
+/** One matcher, shared by the result list and the facet counts. */
+function matchesQuery(r: SearchResult, q: string) {
+  return r.title.toLowerCase().includes(q)
     || r.snippet.toLowerCase().includes(q)
-    || r.meta.toLowerCase().includes(q))
+    || r.meta.toLowerCase().includes(q)
+}
+
+const { query, sortKey, visible } = useCollection(searchResults, {
+  search: matchesQuery,
+  filters: {
+    // Read through the ref so the facet nav keeps narrowing the results.
+    kind: r => activeKind.value === 'all' || r.kind === activeKind.value,
+  },
+  // Relevance means score high-to-low, so the comparator carries the
+  // direction and the control only ever swaps the key.
+  comparators: {
+    score: (a, b) => b.score - a.score,
+    title: (a, b) => a.title.localeCompare(b.title),
+  },
+  initialSort: 'score',
+  pageSize: 0,
 })
 
-const visible = computed(() => {
-  const list = activeKind.value === 'all'
-    ? matched.value
-    : matched.value.filter(r => r.kind === activeKind.value)
-  return [...list].sort((a, b) =>
-    sort.value === 'title' ? a.title.localeCompare(b.title) : b.score - a.score)
+// The page opens on a worked example.
+query.value = 'rate limiter'
+
+const sortItems = [
+  { value: 'score', label: 'Relevance' },
+  { value: 'title', label: 'Title' },
+]
+
+const sort = computed({
+  get: () => sortKey.value ?? 'score',
+  set: (value: string) => { sortKey.value = value },
+})
+
+/** Facet counts ignore the kind filter — they count what the query matched. */
+const matched = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  return searchResults.filter(r => !q || matchesQuery(r, q))
 })
 
 const counts = computed(() => {
@@ -119,16 +143,12 @@ useStagger(list, { each: 0.05, y: 10 })
       <div class="min-w-0 space-y-3">
         <div v-if="visible.length" class="flex items-center gap-2">
           <span class="text-xs text-[var(--text-muted)]">Sort</span>
-          <div class="flex rounded-field border border-[var(--surface-border)] p-0.5">
-            <button
-              v-for="s in (['relevance', 'title'] as const)" :key="s"
-              type="button"
-              class="rounded-[calc(var(--radius-field)-2px)] px-2.5 py-1 text-xs font-medium capitalize transition"
-              :class="sort === s ? 'bg-tide-600 text-white' : 'text-[var(--text-muted)] hover:bg-[var(--surface-sunken)]'"
-              :aria-pressed="sort === s"
-              @click="sort = s"
-            >{{ s }}</button>
-          </div>
+          <GorgSegmented
+            v-model="sort"
+            :items="sortItems"
+            variant="outline"
+            aria-label="Sort order"
+          />
         </div>
 
         <ul v-if="visible.length" ref="list" class="space-y-3">

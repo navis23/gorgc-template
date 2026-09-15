@@ -23,7 +23,12 @@ const kindIcon: Record<EventKind, string> = {
   review: 'lucide:eye',
 }
 
-const view = ref<'month' | 'week' | 'agenda'>('month')
+const view = ref('month')
+const viewItems = [
+  { value: 'month', label: 'Month' },
+  { value: 'week', label: 'Week' },
+  { value: 'agenda', label: 'Agenda' },
+]
 const kinds = Object.keys(eventKindLabel) as EventKind[]
 const active = ref<Set<EventKind>>(new Set(kinds))
 
@@ -116,19 +121,7 @@ const selectedLabel = computed(() =>
 
     <!-- controls -->
     <div class="flex flex-wrap items-center gap-3">
-      <div class="flex rounded-field border border-[var(--surface-border)] p-0.5">
-        <button
-          v-for="v in (['month', 'week', 'agenda'] as const)"
-          :key="v"
-          type="button"
-          class="rounded-[calc(var(--radius-field)-2px)] px-3 py-1.5 text-xs font-medium capitalize transition"
-          :class="view === v
-            ? 'bg-tide-600 text-white'
-            : 'text-[var(--text-muted)] hover:bg-[var(--surface-sunken)]'"
-          :aria-pressed="view === v"
-          @click="view = v"
-        >{{ v }}</button>
-      </div>
+      <GorgSegmented v-model="view" :items="viewItems" variant="outline" aria-label="Calendar view" />
 
       <ul class="flex flex-wrap gap-1.5">
         <li v-for="k in kinds" :key="k">

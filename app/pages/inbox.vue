@@ -5,9 +5,15 @@ import { threads as seed } from '~/utils/mock'
 useHead({ title: 'Inbox' })
 
 const items = ref<Thread[]>(seed.map(t => ({ ...t })))
-const query = ref('')
 const folder = ref<'inbox' | 'archived'>('inbox')
 const selectedId = ref<number | null>(items.value[0]?.id ?? null)
+
+const { query, visible, isEmpty } = useCollection(items, {
+  searchFields: ['subject', 'from', 'preview'],
+  // Read through the ref so switching folder re-filters.
+  filters: { folder: t => t.label === folder.value },
+  pageSize: 0,
+})
 
 const folders = [
   { key: 'inbox' as const, label: 'Inbox', icon: 'lucide:inbox' },
@@ -20,16 +26,6 @@ const tagTone = {
   billing: 'neutral',
   hiring: 'brand',
 } as const
-
-const visible = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  return items.value
-    .filter(t => t.label === folder.value)
-    .filter(t => !q
-      || t.subject.toLowerCase().includes(q)
-      || t.from.toLowerCase().includes(q)
-      || t.preview.toLowerCase().includes(q))
-})
 
 const selected = computed(() => items.value.find(t => t.id === selectedId.value) ?? null)
 const unreadCount = computed(() => items.value.filter(t => t.label === 'inbox' && t.unread).length)
@@ -99,7 +95,7 @@ useStagger(listEl, { each: 0.04, y: 10 })
           </nav>
         </div>
 
-        <ul v-if="visible.length" ref="listEl" class="max-h-[32rem] divide-y divide-[var(--surface-border)] overflow-y-auto">
+        <ul v-if="!isEmpty" ref="listEl" class="max-h-[32rem] divide-y divide-[var(--surface-border)] overflow-y-auto">
           <li v-for="t in visible" :key="t.id">
             <button
               type="button"

@@ -7,20 +7,15 @@ useHead({ title: 'Tile grid' })
 /** Local copy — the switches write to this, never to the shared fixture. */
 const apps = ref<Integration[]>(integrations.map(app => ({ ...app })))
 
-const query = ref('')
 const enabledOnly = ref(false)
 
-const matches = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  return apps.value.filter((app) => {
-    if (enabledOnly.value && !app.enabled)
-      return false
-    if (!q)
-      return true
-    return app.name.toLowerCase().includes(q)
-      || app.description.toLowerCase().includes(q)
-      || app.category.toLowerCase().includes(q)
-  })
+const { query, visible: matches } = useCollection(apps, {
+  searchFields: ['name', 'description', 'category'],
+  filters: {
+    // Read through the ref so the switch keeps narrowing the board.
+    enabled: app => !enabledOnly.value || app.enabled,
+  },
+  pageSize: 0,
 })
 
 interface Group { category: IntegrationCategory, apps: Integration[] }

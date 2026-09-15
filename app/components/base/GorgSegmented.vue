@@ -9,7 +9,7 @@ export interface GorgSegmentedItem {
   disabled?: boolean
 }
 
-type Variant = 'outline' | 'soft'
+type Variant = 'outline' | 'soft' | 'pill'
 type Size = 'xs' | 'sm' | 'md'
 
 const props = withDefaults(defineProps<{
@@ -27,6 +27,8 @@ const model = defineModel<string>({ required: true })
 const shells: Record<Variant, string> = {
   outline: 'rounded-field border border-[var(--surface-border)] p-0.5',
   soft: 'rounded-pill bg-[var(--surface-sunken)] p-1',
+  // Same sunken shell as `soft`, but the active segment is brand-solid.
+  pill: 'rounded-pill bg-[var(--surface-sunken)] p-1',
 }
 
 const segments: Record<Variant, { base: string, on: string, off: string }> = {
@@ -38,6 +40,11 @@ const segments: Record<Variant, { base: string, on: string, off: string }> = {
   soft: {
     base: 'rounded-pill',
     on: 'bg-[var(--surface-raised)] text-[var(--text-strong)] shadow-raise',
+    off: 'text-[var(--text-muted)] hover:text-[var(--text-strong)]',
+  },
+  pill: {
+    base: 'rounded-pill',
+    on: 'bg-tide-600 text-white shadow-raise',
     off: 'text-[var(--text-muted)] hover:text-[var(--text-strong)]',
   },
 }

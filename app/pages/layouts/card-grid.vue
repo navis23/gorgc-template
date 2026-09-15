@@ -4,11 +4,8 @@ import { directory, TEAMS } from '~/utils/mock-collections'
 
 useHead({ title: 'Card grid' })
 
-type Density = 'comfortable' | 'compact'
-
-const query = ref('')
 const team = ref<Team | 'all'>('all')
-const density = ref<Density>('comfortable')
+const density = ref('comfortable')
 
 const counts = computed(() => {
   const map = new Map<Team | 'all', number>([['all', directory.length]])
@@ -17,19 +14,13 @@ const counts = computed(() => {
   return map
 })
 
-const people = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  return directory.filter((p) => {
-    if (team.value !== 'all' && p.team !== team.value)
-      return false
-    if (!q)
-      return true
-    return p.name.toLowerCase().includes(q)
-      || p.role.toLowerCase().includes(q)
-      || p.location.toLowerCase().includes(q)
-      || p.email.toLowerCase().includes(q)
-  })
+const collection = useCollection(directory, {
+  searchFields: ['name', 'role', 'location', 'email'],
+  // Read through the ref so the team chips stay reactive.
+  filters: { team: p => team.value === 'all' || p.team === team.value },
+  pageSize: 0,
 })
+const { query, visible: people, total, isEmpty } = collection
 
 /** Status is carried by a word and an icon as well as a tone. */
 const presence: Record<PresenceStatus, {
@@ -48,7 +39,7 @@ const gridClass = computed(() => density.value === 'compact'
   ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3'
   : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4')
 
-const densities: Array<{ value: Density, label: string, icon: string }> = [
+const densities = [
   { value: 'comfortable', label: 'Comfortable', icon: 'lucide:layout-grid' },
   { value: 'compact', label: 'Compact', icon: 'lucide:grid-3x3' },
 ]
@@ -57,7 +48,7 @@ const grid = useTemplateRef<HTMLElement>('grid')
 useStagger(grid, { each: 0.035, y: 16 })
 
 function reset() {
-  query.value = ''
+  collection.reset()
   team.value = 'all'
 }
 </script>
@@ -68,7 +59,7 @@ function reset() {
       <div>
         <h1 class="text-xl font-semibold text-[var(--text-strong)]">Directory</h1>
         <p class="mt-1 text-sm text-[var(--text-muted)]">
-          {{ people.length }} of {{ directory.length }} people
+          {{ total }} of {{ directory.length }} people
           <span v-if="team !== 'all'"> · {{ team }}</span>
         </p>
       </div>
@@ -92,22 +83,13 @@ function reset() {
           class="w-full sm:max-w-xs"
         />
 
-        <div class="ms-auto flex items-center gap-1 rounded-pill bg-[var(--surface-sunken)] p-1" role="group" aria-label="Card density">
-          <button
-            v-for="d in densities"
-            :key="d.value"
-            type="button"
-            :aria-pressed="density === d.value"
-            class="inline-flex h-7 items-center gap-1.5 rounded-pill px-2.5 text-xs font-medium transition-colors duration-(--duration-snap)"
-            :class="density === d.value
-              ? 'bg-[var(--surface-raised)] text-[var(--text-strong)] shadow-raise'
-              : 'text-[var(--text-muted)] hover:text-[var(--text-strong)]'"
-            @click="density = d.value"
-          >
-            <Icon :name="d.icon" class="size-3.5" aria-hidden="true" />
-            {{ d.label }}
-          </button>
-        </div>
+        <GorgSegmented
+          v-model="density"
+          :items="densities"
+          variant="soft"
+          aria-label="Card density"
+          class="ms-auto"
+        />
       </div>
 
       <div class="-mx-1 flex flex-wrap gap-2 px-1">
@@ -141,7 +123,7 @@ function reset() {
       </div>
     </div>
 
-    <ul v-if="people.length" ref="grid" class="grid" :class="gridClass">
+    <ul v-if="!isEmpty" ref="grid" class="grid" :class="gridClass">
       <li v-for="person in people" :key="person.id">
         <article
           class="surface-card flex h-full flex-col shadow-raise transition-[box-shadow,transform] duration-(--duration-base)

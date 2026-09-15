@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Member } from '~/utils/mock'
 import { members } from '~/utils/mock'
 
 useHead({ title: 'Members' })
@@ -13,44 +12,14 @@ const columns = [
   { key: 'joined', label: 'Joined', sortable: true, nowrap: true },
 ]
 
-const query = ref('')
-const sortKey = ref<string | null>('name')
-const sortDirection = ref<'asc' | 'desc'>('asc')
-const page = ref(1)
-const pageSize = ref(10)
-
-const filtered = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  if (!q)
-    return members
-  return members.filter(m =>
-    m.name.toLowerCase().includes(q)
-    || m.email.toLowerCase().includes(q)
-    || m.team.toLowerCase().includes(q)
-    || m.role.toLowerCase().includes(q))
+// Search, sort and pagination all live in the collection — including the
+// "narrowing the list sends you back to page 1" rule.
+const { query, sortKey, sortDirection, page, pageSize, visible, total } = useCollection(members, {
+  searchFields: ['name', 'email', 'team', 'role'],
+  initialSort: 'name',
+  initialDirection: 'asc',
+  pageSize: 10,
 })
-
-const sorted = computed(() => {
-  const key = sortKey.value
-  if (!key)
-    return filtered.value
-  const dir = sortDirection.value === 'asc' ? 1 : -1
-  return [...filtered.value].sort((a, b) => {
-    const x = a[key as keyof Member]
-    const y = b[key as keyof Member]
-    if (typeof x === 'number' && typeof y === 'number')
-      return (x - y) * dir
-    return String(x).localeCompare(String(y)) * dir
-  })
-})
-
-const paged = computed(() => {
-  const start = (page.value - 1) * pageSize.value
-  return sorted.value.slice(start, start + pageSize.value)
-})
-
-// Any narrowing of the result set should return the user to page 1.
-watch([query, pageSize], () => { page.value = 1 })
 
 const statusTone = {
   active: 'positive',
@@ -65,7 +34,7 @@ const statusTone = {
       <div>
         <h1 class="text-xl font-semibold text-[var(--text-strong)]">Members</h1>
         <p class="mt-1 text-sm text-[var(--text-muted)]">
-          {{ filtered.length }} of {{ members.length }} people in this workspace.
+          {{ total }} of {{ members.length }} people in this workspace.
         </p>
       </div>
       <GorgButton size="sm">
@@ -92,7 +61,7 @@ const statusTone = {
         v-model:sort-key="sortKey"
         v-model:sort-direction="sortDirection"
         :columns="columns"
-        :rows="paged"
+        :rows="visible"
         row-key="id"
         hoverable
         striped
@@ -134,7 +103,7 @@ const statusTone = {
         <GorgPagination
           v-model:page="page"
           v-model:page-size="pageSize"
-          :total="sorted.length"
+          :total="total"
           unit="members"
         />
       </div>

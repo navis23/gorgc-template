@@ -6,10 +6,20 @@ useHead({ title: 'Files' })
 
 const toast = useToast()
 const items = ref<FileNode[]>(seed.map(f => ({ ...f })))
-const query = ref('')
-const view = ref<'grid' | 'list'>('grid')
-const sortKey = ref<'name' | 'modified' | 'size'>('name')
+const view = ref('grid')
 const selected = ref<Set<number>>(new Set())
+
+const viewItems = [
+  { value: 'grid', icon: 'lucide:layout-grid', ariaLabel: 'grid view' },
+  { value: 'list', icon: 'lucide:list', ariaLabel: 'list view' },
+]
+
+/** Folders always lead, whatever the sort. */
+function foldersFirst(a: FileNode, b: FileNode) {
+  if ((a.kind === 'folder') !== (b.kind === 'folder'))
+    return a.kind === 'folder' ? -1 : 1
+  return 0
+}
 
 const kindTint: Record<string, string> = {
   folder: 'text-[var(--color-caution)] bg-[color-mix(in_oklch,var(--color-caution)_16%,transparent)]',
@@ -21,19 +31,15 @@ const kindTint: Record<string, string> = {
   pdf: 'text-[var(--color-critical)] bg-[color-mix(in_oklch,var(--color-critical)_14%,transparent)]',
 }
 
-const visible = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  const list = items.value.filter(f => !q || f.name.toLowerCase().includes(q) || f.owner.toLowerCase().includes(q))
-  return [...list].sort((a, b) => {
-    // Folders always lead, whatever the sort.
-    if ((a.kind === 'folder') !== (b.kind === 'folder'))
-      return a.kind === 'folder' ? -1 : 1
-    if (sortKey.value === 'size')
-      return (b.size ?? 0) - (a.size ?? 0)
-    if (sortKey.value === 'modified')
-      return b.modified.localeCompare(a.modified)
-    return a.name.localeCompare(b.name)
-  })
+const { query, sortKey, visible, total, isEmpty } = useCollection(items, {
+  searchFields: ['name', 'owner'],
+  initialSort: 'name',
+  pageSize: 0,
+  comparators: {
+    name: (a, b) => foldersFirst(a, b) || a.name.localeCompare(b.name),
+    modified: (a, b) => foldersFirst(a, b) || b.modified.localeCompare(a.modified),
+    size: (a, b) => foldersFirst(a, b) || (b.size ?? 0) - (a.size ?? 0),
+  },
 })
 
 function toggle(id: number) {
@@ -73,7 +79,7 @@ const sortOptions = [
       <div>
         <h1 class="text-xl font-semibold text-[var(--text-strong)]">Files</h1>
         <p class="mt-1 text-sm text-[var(--text-muted)]">
-          {{ visible.length }} {{ visible.length === 1 ? 'item' : 'items' }} in this folder.
+          {{ total }} {{ total === 1 ? 'item' : 'items' }} in this folder.
         </p>
       </div>
       <div class="flex gap-2">
@@ -98,19 +104,14 @@ const sortOptions = [
         <div class="flex flex-wrap items-center gap-3">
           <GorgInput v-model="query" placeholder="Search files…" icon="lucide:search" size="sm" clearable class="w-full sm:max-w-xs" />
           <GorgSelect v-model="sortKey" :items="sortOptions" size="sm" class="w-full sm:w-44" />
-          <div class="ms-auto flex rounded-field border border-[var(--surface-border)] p-0.5">
-            <button
-              v-for="v in (['grid', 'list'] as const)" :key="v"
-              type="button"
-              class="rounded-[calc(var(--radius-field)-2px)] px-2.5 py-1.5 transition"
-              :class="view === v ? 'bg-tide-600 text-white' : 'text-[var(--text-muted)] hover:bg-[var(--surface-sunken)]'"
-              :aria-pressed="view === v"
-              :aria-label="`${v} view`"
-              @click="view = v"
-            >
-              <Icon :name="v === 'grid' ? 'lucide:layout-grid' : 'lucide:list'" class="size-4" />
-            </button>
-          </div>
+          <GorgSegmented
+            v-model="view"
+            :items="viewItems"
+            variant="outline"
+            size="md"
+            aria-label="File view"
+            class="ms-auto"
+          />
         </div>
 
         <!-- bulk bar -->
@@ -135,7 +136,7 @@ const sortOptions = [
         </div>
 
         <!-- grid view -->
-        <div v-if="view === 'grid' && visible.length" ref="grid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div v-if="view === 'grid' && !isEmpty" ref="grid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <article
             v-for="f in visible"
             :key="f.id"
@@ -171,7 +172,7 @@ const sortOptions = [
         </div>
 
         <!-- list view -->
-        <GorgCard v-else-if="visible.length" :padded="false">
+        <GorgCard v-else-if="!isEmpty" :padded="false">
           <div class="overflow-x-auto">
             <table class="w-full min-w-[40rem] text-sm">
               <thead>

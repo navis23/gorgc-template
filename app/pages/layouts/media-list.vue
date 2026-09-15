@@ -7,20 +7,18 @@ import { mediaLibrary } from '~/utils/mock-collections'
 useHead({ title: 'Media list' })
 
 type ViewMode = 'list' | 'compact'
-type SortKey = 'newest' | 'views' | 'discussed'
 
-const query = ref('')
 const tag = ref<string | null>(null)
 const mode = ref<ViewMode>('list')
-const sortKey = ref<SortKey>('newest')
 
+/** Each option names the field it orders by — all three read high to low. */
 const sortItems = [
-  { label: 'Newest first', value: 'newest', icon: 'lucide:calendar' },
+  { label: 'Newest first', value: 'publishedDaysAgo', icon: 'lucide:calendar' },
   { label: 'Most viewed', value: 'views', icon: 'lucide:eye' },
-  { label: 'Most discussed', value: 'discussed', icon: 'lucide:message-circle' },
+  { label: 'Most discussed', value: 'comments', icon: 'lucide:message-circle' },
 ]
 
-const modes: Array<{ value: ViewMode, label: string, icon: string }> = [
+const modes = [
   { value: 'list', label: 'List', icon: 'lucide:rows-3' },
   { value: 'compact', label: 'Compact', icon: 'lucide:menu' },
 ]
@@ -32,25 +30,15 @@ const kinds: Record<MediaKind, { label: string, icon: string, wash: string, tone
   dataset: { label: 'Dataset', icon: 'lucide:database', wash: 'from-ink-500 to-ink-800', tone: 'neutral' },
 }
 
-const items = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  const filtered = mediaLibrary.filter((item) => {
-    if (tag.value && !item.tags.includes(tag.value))
-      return false
-    if (!q)
-      return true
-    return item.title.toLowerCase().includes(q)
-      || item.excerpt.toLowerCase().includes(q)
-      || item.author.toLowerCase().includes(q)
-  })
-
-  return filtered.sort((a, b) => {
-    if (sortKey.value === 'views')
-      return b.views - a.views
-    if (sortKey.value === 'discussed')
-      return b.comments - a.comments
-    return b.publishedDaysAgo - a.publishedDaysAgo
-  })
+const { query, sortKey, visible: items, total, isEmpty } = useCollection(mediaLibrary, {
+  searchFields: ['title', 'excerpt', 'author'],
+  filters: {
+    // Read through the ref so picking a tag chip re-filters the list.
+    tag: item => !tag.value || item.tags.includes(tag.value),
+  },
+  initialSort: 'publishedDaysAgo',
+  initialDirection: 'desc',
+  pageSize: 0,
 })
 
 function toggleTag(value: string) {
@@ -72,7 +60,7 @@ useStagger(list, { each: 0.05, y: 16 })
       <div>
         <h1 class="text-xl font-semibold text-[var(--text-strong)]">Library</h1>
         <p class="mt-1 text-sm text-[var(--text-muted)]">
-          {{ items.length }} of {{ mediaLibrary.length }} entries · articles, guides, recordings and datasets
+          {{ total }} of {{ mediaLibrary.length }} entries · articles, guides, recordings and datasets
         </p>
       </div>
       <GorgButton size="sm">
@@ -99,25 +87,15 @@ useStagger(list, { each: 0.05, y: 16 })
         size="sm"
         aria-label="Sort entries"
         class="w-full sm:ms-auto sm:w-48"
-        @update:model-value="value => sortKey = value as SortKey"
+        @update:model-value="value => sortKey = value as string"
       />
 
-      <div class="flex items-center gap-1 rounded-pill bg-[var(--surface-sunken)] p-1" role="group" aria-label="Row size">
-        <button
-          v-for="m in modes"
-          :key="m.value"
-          type="button"
-          :aria-pressed="mode === m.value"
-          class="inline-flex h-7 items-center gap-1.5 rounded-pill px-2.5 text-xs font-medium transition-colors duration-(--duration-snap)"
-          :class="mode === m.value
-            ? 'bg-[var(--surface-raised)] text-[var(--text-strong)] shadow-raise'
-            : 'text-[var(--text-muted)] hover:text-[var(--text-strong)]'"
-          @click="mode = m.value"
-        >
-          <Icon :name="m.icon" class="size-3.5" aria-hidden="true" />
-          {{ m.label }}
-        </button>
-      </div>
+      <GorgSegmented
+        v-model="mode"
+        :items="modes"
+        variant="soft"
+        aria-label="Row size"
+      />
     </div>
 
     <p v-if="tag" class="flex flex-wrap items-center gap-2 text-sm text-[var(--text-muted)]">
@@ -134,7 +112,7 @@ useStagger(list, { each: 0.05, y: 16 })
       </button>
     </p>
 
-    <ul v-if="items.length" ref="list" :class="mode === 'compact' ? 'space-y-2' : 'space-y-3'">
+    <ul v-if="!isEmpty" ref="list" :class="mode === 'compact' ? 'space-y-2' : 'space-y-3'">
       <li v-for="item in items" :key="item.id">
         <article
           class="surface-card shadow-raise transition-[box-shadow,transform] duration-(--duration-base) hover:shadow-float"

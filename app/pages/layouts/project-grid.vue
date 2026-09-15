@@ -5,29 +5,17 @@ import { projects } from '~/utils/mock-collections'
 
 useHead({ title: 'Project grid' })
 
-type SortKey = 'name' | 'due' | 'progress'
-
-const sortKey = ref<SortKey>('due')
-const direction = ref<'asc' | 'desc'>('asc')
-
+/** Each option names the project field it orders by. */
 const sortItems = [
   { label: 'Name', value: 'name', icon: 'lucide:case-sensitive' },
-  { label: 'Due date', value: 'due', icon: 'lucide:calendar' },
+  { label: 'Due date', value: 'dueInDays', icon: 'lucide:calendar' },
   { label: 'Progress', value: 'progress', icon: 'lucide:activity' },
 ]
 
-const sorted = computed(() => {
-  const dir = direction.value === 'asc' ? 1 : -1
-  return [...projects].sort((a, b) => {
-    switch (sortKey.value) {
-      case 'name':
-        return a.name.localeCompare(b.name) * dir
-      case 'progress':
-        return (a.progress - b.progress) * dir
-      default:
-        return (a.dueInDays - b.dueInDays) * dir
-    }
-  })
+const { sortKey, sortDirection: direction, visible: sorted } = useCollection(projects, {
+  initialSort: 'dueInDays',
+  initialDirection: 'asc',
+  pageSize: 0,
 })
 
 /** Header washes are built from brand tokens, never an image. */
@@ -86,7 +74,7 @@ const active = computed(() => projects.filter(p => p.status !== 'shipped').lengt
         size="sm"
         aria-labelledby="sort-label"
         class="w-full sm:w-44"
-        @update:model-value="value => sortKey = value as SortKey"
+        @update:model-value="value => sortKey = value as string"
       />
       <button
         type="button"
