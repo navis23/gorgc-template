@@ -46,6 +46,16 @@ export const trafficSeries = [
   { name: 'Referral', data: walk(7, 1800, 0.01, 0.25).map(Math.round) },
 ]
 
+/**
+ * Precomputed here rather than by calling walk() inside a page's setup.
+ * walk() draws from the shared seeded stream, so consuming it during render
+ * puts the server and the client at different stream positions and the two
+ * disagree — a hydration mismatch.
+ */
+export const sessionsSeries = [
+  { name: 'Sessions', data: walk(12, 5200, 0.02, 0.12).map(Math.round) },
+]
+
 export const channelSplit = [
   { name: 'Organic', value: 4210 },
   { name: 'Paid', value: 2870 },

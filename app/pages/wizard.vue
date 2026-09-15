@@ -95,6 +95,27 @@ const current = computed<StepMeta>(() => steps[step.value] ?? steps[0]!)
 const isLast = computed(() => step.value === steps.length - 1)
 const progress = computed(() => ((step.value + 1) / steps.length) * 100)
 
+/**
+ * GorgStepper is keyed by step value; this wizard tracks a numeric index.
+ * `disabled` carries the "only ground already covered" rule, which `linear`
+ * cannot express — it would block returning forward after stepping back.
+ */
+const stepperSteps = computed(() => steps.map((meta, index) => ({
+  value: meta.key,
+  title: meta.label,
+  icon: meta.icon,
+  disabled: index > furthest.value,
+})))
+
+const stepValue = computed({
+  get: () => current.value.key,
+  set: (key: string) => {
+    const index = steps.findIndex(meta => meta.key === key)
+    if (index !== -1)
+      jump(index)
+  },
+})
+
 /* ---------------------------------------------------------------------- */
 /* validation                                                              */
 /* ---------------------------------------------------------------------- */
@@ -389,55 +410,12 @@ function onLeave(el: Element, complete: () => void) {
     </header>
 
     <!-- step indicator -->
-    <nav v-if="!done" aria-label="Setup progress">
-      <ol class="hidden items-start sm:flex">
-        <li v-for="(meta, index) in steps" :key="meta.key" class="relative flex-1">
-          <span
-            v-if="index > 0"
-            class="absolute top-6 -left-1/2 h-0.5 w-full transition-colors duration-(--duration-slow)"
-            :class="index <= step ? 'bg-tide-500' : 'bg-[var(--surface-border)]'"
-            aria-hidden="true"
-          />
-
-          <button
-            type="button"
-            class="relative flex w-full flex-col items-center gap-2 rounded-field px-1 py-1 text-center transition-opacity duration-(--duration-snap) disabled:pointer-events-none disabled:opacity-60"
-            :disabled="index > furthest"
-            :aria-current="index === step ? 'step' : undefined"
-            @click="jump(index)"
-          >
-            <span
-              class="grid size-10 place-items-center rounded-pill border-2 bg-[var(--surface-page)] transition-[background-color,border-color,color] duration-(--duration-base)"
-              :class="index < step
-                ? 'border-tide-600 bg-tide-600 text-white'
-                : index === step
-                  ? 'border-tide-600 text-tide-700 dark:text-tide-200'
-                  : 'border-[var(--surface-border)] text-[var(--text-muted)]'"
-            >
-              <Icon v-if="index < step" name="lucide:check" class="size-5" aria-hidden="true" />
-              <Icon v-else :name="meta.icon" class="size-5" aria-hidden="true" />
-            </span>
-
-            <span class="min-w-0">
-              <span class="sr-only">Step {{ index + 1 }} of {{ steps.length }}: </span>
-              <span
-                class="block truncate text-xs font-semibold"
-                :class="index === step ? 'text-[var(--text-strong)]' : 'text-[var(--text-muted)]'"
-              >{{ meta.label }}</span>
-            </span>
-          </button>
-        </li>
-      </ol>
-
-      <!-- compact form of the same thing on phones -->
-      <div class="space-y-2 sm:hidden">
-        <div class="flex items-baseline justify-between gap-3">
-          <p class="text-sm font-semibold text-[var(--text-strong)]">{{ current.label }}</p>
-          <p class="text-xs text-[var(--text-muted)]">Step {{ step + 1 }} of {{ steps.length }}</p>
-        </div>
-        <GorgProgress :value="progress" size="xs" />
-      </div>
-    </nav>
+    <GorgStepper
+      v-if="!done"
+      v-model="stepValue"
+      :steps="stepperSteps"
+      aria-label="Setup progress"
+    />
 
     <Transition :css="false" mode="out-in" @enter="onEnter" @leave="onLeave">
       <!-- ------------------------------------------------------------- -->

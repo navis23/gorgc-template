@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { InvoiceEvent } from '~/utils/mock-records'
-import { dayTimeLabel, demoDate } from '~/utils/datetime'
+import { demoDate } from '~/utils/datetime'
 import { formatCents, invoice, invoiceEvents, lineItems } from '~/utils/mock-records'
 
 useHead({ title: `${invoice.number} · Invoice` })
@@ -38,7 +38,7 @@ function markPaid() {
     id: 'e-paid',
     label: 'Paid in full',
     detail: `Bank transfer received · ${formatCents(total, invoice.currency)}`,
-    at: dayTimeLabel(demoDate(0, 11, 30)),
+    at: demoDate(0, 11, 30),
     icon: 'lucide:banknote',
     tone: 'positive',
   })
@@ -63,8 +63,18 @@ const eventTone: Record<InvoiceEvent['tone'], string> = {
 const rowsEl = useTemplateRef<HTMLElement>('rowsEl')
 const eventsEl = useTemplateRef<HTMLElement>('eventsEl')
 
+/** GorgTimeline speaks title/description; the invoice fixtures speak label/detail. */
+const timelineItems = computed(() => events.value.map(event => ({
+  id: event.id,
+  title: event.label,
+  description: event.detail,
+  icon: event.icon,
+  tone: event.tone,
+  at: event.at,
+})))
+
 useStagger(rowsEl, { selector: ':scope > tr', each: 0.05, y: 10 })
-useStagger(eventsEl, { each: 0.06, y: 12 })
+useStagger(eventsEl, { selector: 'li', each: 0.06, y: 12 })
 </script>
 
 <template>
@@ -305,26 +315,9 @@ useStagger(eventsEl, { each: 0.06, y: 12 })
         <GorgCard>
           <template #title>History</template>
 
-          <ol ref="eventsEl">
-            <li v-for="(event, index) in events" :key="event.id" class="relative flex gap-3 pb-4 last:pb-0">
-              <span
-                v-if="index < events.length - 1"
-                class="absolute start-3.5 top-8 bottom-0 w-px -translate-x-1/2 bg-[var(--surface-border)] rtl:translate-x-1/2"
-                aria-hidden="true"
-              />
-              <span
-                class="relative grid size-7 shrink-0 place-items-center rounded-pill"
-                :class="eventTone[event.tone]"
-              >
-                <Icon :name="event.icon" class="size-3.5" aria-hidden="true" />
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-[var(--text-strong)]">{{ event.label }}</p>
-                <p class="mt-0.5 text-xs leading-relaxed text-[var(--text-muted)]">{{ event.detail }}</p>
-                <time class="mt-0.5 block text-xs text-[var(--text-muted)]">{{ event.at }}</time>
-              </div>
-            </li>
-          </ol>
+          <div ref="eventsEl">
+            <GorgTimeline :items="timelineItems" size="sm" />
+          </div>
         </GorgCard>
       </aside>
     </div>

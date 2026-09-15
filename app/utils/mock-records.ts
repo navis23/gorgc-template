@@ -339,7 +339,8 @@ export interface InvoiceEvent {
   id: string
   label: string
   detail: string
-  at: string
+  /** A real Date — GorgTimeline renders <time datetime> and a relative stamp. */
+  at: Date
   icon: string
   tone: 'neutral' | 'info' | 'brand' | 'positive' | 'caution'
 }
@@ -384,10 +385,10 @@ export const lineItems: LineItem[] = [
 
 /** Fixed part of the story; "paid" is appended at runtime by the toolbar. */
 export const invoiceEvents: InvoiceEvent[] = [
-  { id: 'e1', label: 'Drafted', detail: 'Prepared by Rosa Betancourt', at: dayTimeLabel(demoDate(-15, 14, 10)), icon: 'lucide:file-pen', tone: 'neutral' },
-  { id: 'e2', label: 'Issued', detail: 'Sent to accounts@northbank.example', at: dayTimeLabel(demoDate(-12, 9, 0)), icon: 'lucide:send', tone: 'brand' },
-  { id: 'e3', label: 'Opened', detail: 'Viewed twice by Marcus Webb', at: dayTimeLabel(demoDate(-11, 11, 42)), icon: 'lucide:mail-open', tone: 'info' },
-  { id: 'e4', label: 'Reminder sent', detail: 'Automatic nudge, 14 days before due', at: dayTimeLabel(demoDate(-4, 8, 0)), icon: 'lucide:bell-ring', tone: 'caution' },
+  { id: 'e1', label: 'Drafted', detail: 'Prepared by Rosa Betancourt', at: demoDate(-15, 14, 10), icon: 'lucide:file-pen', tone: 'neutral' },
+  { id: 'e2', label: 'Issued', detail: 'Sent to accounts@northbank.example', at: demoDate(-12, 9, 0), icon: 'lucide:send', tone: 'brand' },
+  { id: 'e3', label: 'Opened', detail: 'Viewed twice by Marcus Webb', at: demoDate(-11, 11, 42), icon: 'lucide:mail-open', tone: 'info' },
+  { id: 'e4', label: 'Reminder sent', detail: 'Automatic nudge, 14 days before due', at: demoDate(-4, 8, 0), icon: 'lucide:bell-ring', tone: 'caution' },
 ]
 
 /* ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 import type { DayLike } from '~/utils/datetime'
 import { dayLabel, dayTimeLabel, demoDate, isoDay, relativeLabel } from '~/utils/datetime'
 
-type Tone = 'neutral' | 'brand' | 'positive' | 'caution' | 'critical'
+type Tone = 'neutral' | 'brand' | 'info' | 'positive' | 'caution' | 'critical'
 type Size = 'sm' | 'md'
 
 interface TimelineItem {
@@ -54,6 +54,7 @@ function stampIso(at: DayLike): string {
 const tones: Record<Tone, string> = {
   neutral: 'bg-[var(--surface-sunken)] text-[var(--text-muted)]',
   brand: 'bg-tide-100 text-tide-700 dark:bg-tide-900/50 dark:text-tide-200',
+  info: 'bg-[color-mix(in_oklch,var(--color-info)_16%,transparent)] text-[var(--color-info)]',
   positive: 'bg-[color-mix(in_oklch,var(--color-positive)_18%,transparent)] text-[var(--color-positive)]',
   caution: 'bg-[color-mix(in_oklch,var(--color-caution)_22%,transparent)] text-[var(--color-caution)]',
   critical: 'bg-[color-mix(in_oklch,var(--color-critical)_18%,transparent)] text-[var(--color-critical)]',

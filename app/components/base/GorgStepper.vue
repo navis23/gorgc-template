@@ -17,6 +17,10 @@ interface Step {
   title: string
   description?: string
   icon?: string
+  /** Gate this step explicitly. `linear` only knows about the current
+   *  step, so a wizard that lets you revisit ground already covered
+   *  needs per-step control. */
+  disabled?: boolean
 }
 
 const props = withDefaults(defineProps<{
@@ -146,7 +150,7 @@ const railFill: Record<State, string> = {
         :key="step.value"
         :step="index + 1"
         :completed="index < currentIndex"
-        :disabled="linear && index > currentIndex"
+        :disabled="step.disabled || (linear && index > currentIndex)"
         :aria-current="index === currentIndex ? 'step' : undefined"
         class="relative flex w-full"
         :class="index < lastIndex && (size === 'sm' ? 'pb-5' : 'pb-6')"
@@ -211,7 +215,7 @@ const railFill: Record<State, string> = {
           :key="step.value"
           :step="index + 1"
           :completed="index < currentIndex"
-          :disabled="linear && index > currentIndex"
+          :disabled="step.disabled || (linear && index > currentIndex)"
           :aria-current="index === currentIndex ? 'step' : undefined"
           class="relative flex min-w-0 flex-1 flex-col items-center"
         >

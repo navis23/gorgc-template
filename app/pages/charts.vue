@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { channelSplit, MONTHS, revenueSeries, trafficSeries, WEEKDAYS, walk } from '~/utils/mock'
+import { MONTHS, WEEKDAYS, channelSplit, revenueSeries, sessionsSeries, trafficSeries } from '~/utils/mock'
 import { formatCompact } from '~/utils/chart'
 
 useHead({ title: 'Charts' })
@@ -7,7 +7,7 @@ useHead({ title: 'Charts' })
 const money = (n: number) => `$${formatCompact(n)}`
 
 // A single series needs no legend — the title names it.
-const singleSeries = [{ name: 'Sessions', data: walk(12, 5200, 0.02, 0.12).map(Math.round) }]
+const singleSeries = sessionsSeries
 
 const stackedSeries = trafficSeries
 const grid = useTemplateRef<HTMLElement>('grid')
