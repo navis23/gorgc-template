@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<{
 })
 
 const mobileOpen = useShellOverlay()
-const stored = useLocalStorage(`${props.storageKey}:collapsed`, false)
+const stored = usePersistedState(`${props.storageKey}:collapsed`, false)
 
 /**
  * What the nav actually renders as. The overlay is always full width, so the

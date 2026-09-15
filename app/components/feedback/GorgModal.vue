@@ -28,16 +28,16 @@ const sizes = {
     <DialogPortal>
       <DialogOverlay
         class="fixed inset-0 z-50 bg-ink-950/50 backdrop-blur-sm
-               data-[state=open]:animate-in data-[state=open]:fade-in
-               data-[state=closed]:animate-out data-[state=closed]:fade-out"
+               data-[state=open]:fade-in
+               data-[state=closed]:fade-out"
       />
 
       <DialogContent
         :class="sizes[size]"
         class="fixed start-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2
                surface-card shadow-lift focus:outline-none
-               data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95
-               data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95"
+               data-[state=open]:pop-in
+               data-[state=closed]:pop-out"
         @escape-key-down="!dismissible && $event.preventDefault()"
         @pointer-down-outside="!dismissible && $event.preventDefault()"
       >

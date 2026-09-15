@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<{
 })
 
 const groupId = props.item.id ?? props.item.to ?? props.item.label
-const open = useLocalStorage(`${props.storageKey}:${groupId}`, props.defaultOpen)
+const open = usePersistedState(`${props.storageKey}:${groupId}`, props.defaultOpen)
 const branchActive = useBranchActive(() => props.item)
 
 watch(branchActive, (value) => {

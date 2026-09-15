@@ -167,3 +167,46 @@
     --chart-surface: var(--color-ink-900);
   }
 }
+
+/* ---------------------------------------------------------------
+   Overlay motion
+
+   The `animate-in` / `fade-in` / `zoom-in-95` classes are from the
+   tailwindcss-animate plugin, which is NOT installed here — they were
+   generating no CSS at all, so overlays had no entrance or exit.
+   These are gorg's own, built on the motion tokens above.
+
+   Real keyframes also matter for correctness, not just polish: Reka's
+   Presence only defers unmount for CSS *keyframe* animations, so an exit
+   animation is what lets a closing overlay finish before it disappears.
+---------------------------------------------------------------- */
+/* Animate the standalone `scale` property, NOT `transform`: a centred dialog
+   positions itself with a translate, and animating `transform` would wipe that
+   out mid-animation and make the panel jump. `scale` composes instead. */
+@keyframes gorg-pop-in {
+  from { opacity: 0; scale: 0.96; }
+  to   { opacity: 1; scale: 1; }
+}
+@keyframes gorg-pop-out {
+  from { opacity: 1; scale: 1; }
+  to   { opacity: 0; scale: 0.96; }
+}
+@keyframes gorg-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gorg-fade-out { from { opacity: 1; } to { opacity: 0; } }
+
+@utility pop-in {
+  animation: gorg-pop-in var(--duration-base) var(--ease-entrance) both;
+}
+@utility pop-out {
+  animation: gorg-pop-out var(--duration-snap) var(--ease-exit) both;
+}
+@utility fade-in {
+  animation: gorg-fade-in var(--duration-base) var(--ease-entrance) both;
+}
+@utility fade-out {
+  animation: gorg-fade-out var(--duration-snap) var(--ease-exit) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pop-in, .pop-out, .fade-in, .fade-out { animation-duration: 1ms; }
+}

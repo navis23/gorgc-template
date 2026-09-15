@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<{
 
 const route = useRoute()
 const mobileOpen = useShellOverlay()
-const collapsed = useLocalStorage(`${props.storageKey}:collapsed`, false)
+const collapsed = usePersistedState(`${props.storageKey}:collapsed`, false)
 const picked = ref<string | null>(null)
 
 const branchKey = computed(() => {
