@@ -12,6 +12,8 @@ const props = withDefaults(defineProps<{
   area?: boolean
   /** Colour by direction instead of a fixed slot. */
   tone?: boolean
+  /** For metrics where down is good (latency, time-to-hire, cost). */
+  invert?: boolean
 }>(), { height: 36, area: true })
 
 const wrap = useTemplateRef<HTMLElement>('wrap')
@@ -33,7 +35,12 @@ const stroke = computed(() => {
     return slotColor(0)
   const first = props.data[0] ?? 0
   const last = props.data.at(-1) ?? 0
-  return last >= first ? 'var(--color-positive)' : 'var(--color-critical)'
+  // Without `invert`, a falling line on a "lower is better" metric renders red
+  // beside a green delta — the tile contradicting itself.
+  const rising = last >= first
+  return (props.invert ? !rising : rising)
+    ? 'var(--color-positive)'
+    : 'var(--color-critical)'
 })
 
 const geo = computed(() => {

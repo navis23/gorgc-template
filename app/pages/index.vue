@@ -9,6 +9,19 @@ useStagger(grid, { each: 0.05 })
 
 const money = (n: number) => `$${formatCompact(n)}`
 
+/**
+ * Derive a tile's delta from the series it displays.
+ *
+ * These were hardcoded, so a seeded walk that happened to end down rendered a
+ * red sparkline beside a green delta — the tile contradicting itself. Deriving
+ * makes that impossible.
+ */
+function trend(series: number[]) {
+  const first = series[0] ?? 0
+  const last = series.at(-1) ?? 0
+  return first ? (last - first) / first : 0
+}
+
 const totalRevenue = computed(() =>
   revenueSeries.reduce((a, s) => a + s.data.reduce((x, y) => x + y, 0), 0))
 </script>
@@ -40,11 +53,11 @@ const totalRevenue = computed(() =>
 
     <div ref="grid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <GorgStatTile
-        label="Total revenue" :value="totalRevenue" :delta="0.128"
+        label="Total revenue" :value="totalRevenue" :delta="trend(revenueSeries[0]!.data)"
         icon="lucide:banknote" :format="money" :sparkline="revenueSeries[0]!.data"
       />
       <GorgStatTile
-        label="Active accounts" :value="8412" :delta="0.043"
+        label="Active accounts" :value="8412" :delta="trend(trafficSeries[1]!.data)"
         icon="lucide:users" :sparkline="trafficSeries[1]!.data"
       />
       <GorgStatTile

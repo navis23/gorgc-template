@@ -53,6 +53,6 @@ const good = computed(() => {
       </div>
     </div>
 
-    <GorgSparkline v-if="sparkline?.length" :data="sparkline" tone class="mt-3" />
+    <GorgSparkline v-if="sparkline?.length" :data="sparkline" tone :invert="invert" class="mt-3" />
   </GorgCard>
 </template>

@@ -6,6 +6,20 @@ and hydration counted per page. See `CONVENTIONS.md` for the protocol.
 
 ---
 
+## v0.5.1 — stat tiles stop contradicting themselves
+
+**Fixed**
+- `GorgStatTile` knew about `invert` but never passed it to its sparkline, and
+  `GorgSparkline` hardcoded "up is good". On a lower-is-better metric the tile
+  showed a green delta beside a red falling line. `GorgSparkline` now takes
+  `invert` and the tile forwards it. Ten pages use inverted tiles.
+- `index.vue` hardcoded `+12.8%` and `+4.3%` deltas next to seeded walks that
+  could end down — a green delta beside a red sparkline describing the same
+  metric. Deltas are now derived from the series they sit beside, so they cannot
+  disagree by construction.
+
+---
+
 ## v0.5.0 — adoption batch 2
 
 Six dashboards. **48 pages, 95 components.**
